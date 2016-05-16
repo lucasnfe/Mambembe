@@ -18,7 +18,6 @@ public class MambSingleton<T> : MonoBehaviour where T : MonoBehaviour {
 			//This will only happen the first time this reference is used.
 			if (_instance == null) {
 				_instance = (T)FindObjectOfType (typeof(T));
-				DontDestroyOnLoad(_instance);
 			}
 		
 			if(_instance == null)

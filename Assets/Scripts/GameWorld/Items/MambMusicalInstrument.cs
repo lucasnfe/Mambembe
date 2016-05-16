@@ -82,13 +82,27 @@ public class MambMusicalInstrument : MambItem {
 		}
 	}
 
+	override public bool CheckAvailability(ref string message) {
+
+		if (GameWorld.Instance.Player.energy <= MambConstants.PLAYER_LOW_ENERGY) {
+
+			message = "Jack is too tired to play now.";
+			HUD.Instance.Log (message);
+			return false;
+		}
+
+		return true;
+	}
+
 	override public void ActivateItem() {
 
+		GameWorld.Instance.ForegroundSource.Stop ();
 		GameWorld.Instance.Camera.FocusOnTarget (ActivateMusicSheet);
 	}
 
 	override public void DeactivateItem() {
 
+		GameWorld.Instance.ForegroundSource.Play ();
 		GameWorld.Instance.Camera.LooseFocus (DeactivateMusicSheet);
 	}
 

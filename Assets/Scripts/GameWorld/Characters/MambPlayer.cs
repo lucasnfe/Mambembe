@@ -3,19 +3,20 @@ using System.Collections.Generic;
 
 public class MambPlayer : MonoBehaviour
 {	
-	public int   maxGold   = 100;
-	public float speed     = 6f;
-	public float maxFood   = 100f;
-	public float maxEnergy = 100f;
+	public float speed = 6f;
 
-	private int   gold = 3;
-	private float food = 1f;
-	private float energy = 100f;
+	public AudioClip step;
 
-	private Vector3   playerMove;
-	private Vector3   playerCollisions;
-	private Animator  playerAnimator;
-	private Rigidbody playerRigidbody;
+	public uint gold   { get; set; }
+	public uint food   { get; set; }
+	public uint energy { get; set; }
+	private float stepTimer = 0f;
+
+	private Vector3     playerMove;
+	private Vector3     playerCollisions;
+	private Animator    playerAnimator;
+	private Rigidbody   playerRigidbody;
+	private AudioSource playerAudioSource;
 
 	public PlayerState playerState { get; set; }
 	public MambItem    playerItem  { get; set; }
@@ -25,21 +26,25 @@ public class MambPlayer : MonoBehaviour
 		// Set up references.
 		playerAnimator = GetComponent <Animator> ();
 		playerRigidbody = GetComponent <Rigidbody> ();
+		playerAudioSource = GetComponent <AudioSource> ();
 	}
 
 	void Start() {
 
 		playerState = PlayerState.Idle;
 
-		SetFood (0.1f);
+		SetFood(GameData.PlayerFood);
 
-		SetEnergy (0.1f);
+		SetEnergy(GameData.PlayerEnergy);
 
-		SetGold (gold);
+		SetGold(GameData.PlayerGold);
 	}
 
 	void FixedUpdate ()
 	{
+		if (playerAnimator.GetBool ("isDying") == true)
+			return;
+
 		// Move the player around the scene.
 		Move ();
 
@@ -72,6 +77,11 @@ public class MambPlayer : MonoBehaviour
 
 	void Move ()
 	{
+		if (playerState == PlayerState.Playing) {
+
+			playerMove = Vector3.zero;
+			return;
+		}
 
 		if (HUD.Instance.CursorDelta != Vector3.zero)
 			playerMove = HUD.Instance.CursorDelta;
@@ -80,6 +90,17 @@ public class MambPlayer : MonoBehaviour
 
 		if (Vector3.Distance (transform.position, HUD.Instance.NextCursorPos) <= 0.05f)
 			playerRigidbody.velocity = Vector3.zero;
+
+		if (playerRigidbody.velocity.magnitude >= 1f) {
+
+			stepTimer += Time.fixedDeltaTime;
+			if (stepTimer >= 0.4f) {
+
+				playerAudioSource.PlayOneShot (step);
+				playerAudioSource.pitch = Random.Range (0.8f, 1f);
+				stepTimer = 0f;
+			}
+		}
 	}
 
 	void Turning ()
@@ -103,33 +124,51 @@ public class MambPlayer : MonoBehaviour
 		playerAnimator.SetBool ("IsWalking", walking);
 	}
 
-	public void SetFood(float value) {
+	public void SetFood(uint value) {
 
-		if (value >= 0f && value <= maxFood) {
+		if (value >= 0 && value <= MambConstants.PLAYER_MAX_FOOD) {
 			
-			food = maxFood * value;
-			HUD.Instance.foodBar.value = value;
+			food = value;
+			HUD.Instance.SetFood((float)food/(float)MambConstants.PLAYER_MAX_FOOD);
 		}
 	}
 
-	public void SetEnergy(float value) {
+	public void ConsumeEnergy(uint value) {
 
-		if (value >= 0f && value <= maxEnergy) {
+		SetEnergy (energy - value);
+	}
 
-			energy = maxEnergy * value;
-			HUD.Instance.energyBar.value = value;
+	public void SetEnergy(uint value) {
+
+		if (value >= 0 && value <= MambConstants.PLAYER_MAX_ENERGY) {
+
+			energy = value;
+			HUD.Instance.SetEnergy((float)energy/(float)MambConstants.PLAYER_MAX_ENERGY);
+
+			if (energy <= 0) {
+
+				playerAnimator.SetBool ("isDying", true);
+
+				playerRigidbody.velocity = Vector3.zero; 
+				playerMove = Vector3.zero; 
+			}
 		}
 	}
 
-	public void AddGold(int value) {
+	public void AddGold(uint value) {
 
-		if (gold + value >= 0 && gold + value <= maxGold)
+		if (gold + value >= 0 && gold + value <= MambConstants.PLAYER_MAX_GOLD)
 			SetGold (gold + value);
 	}
 
-	public void SetGold(int value) {
+	public void ConsumeGold(uint value) {
 
-		if (value >= 0 && value <= maxGold)
+		SetGold (gold - value);
+	}
+
+	public void SetGold(uint value) {
+
+		if (value >= 0 && value <= MambConstants.PLAYER_MAX_GOLD)
 			gold = value;
 
 		HUD.Instance.gold.text = value.ToString ();

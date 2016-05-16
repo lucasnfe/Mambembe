@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using System.Collections;
 
 public class HUD : MambSingleton<HUD> {
@@ -8,11 +9,16 @@ public class HUD : MambSingleton<HUD> {
 	private float camRayLength;
 
 	private Color cursorColor;
+	private MambFadeScene sceneFader;
+	private Animator foodBarAnimation;
+	private Animator energyBarAnimation;
+	private AudioSource audioSource;
 
 	public Vector3 CursorDelta   { get; set; }
 	public Vector3 NextCursorPos { get; set; }
 
 	public Texture2D    defaultCursor;
+	public Text         consoleMessage;
 
 	// Item Buttons
 	public ActivateItemButton QButton; 
@@ -35,6 +41,14 @@ public class HUD : MambSingleton<HUD> {
 	// Story display
 	public StoryDisplay storyDisplay;
 
+	void Awake() {
+
+		sceneFader = GetComponent<MambFadeScene> ();
+		foodBarAnimation = foodBar.GetComponentInChildren<Animator> ();
+		energyBarAnimation = energyBar.GetComponentInChildren<Animator> ();
+		audioSource = GetComponent<AudioSource> ();
+	}
+
 	// Use this for initialization
 	void Start () {
 
@@ -45,6 +59,9 @@ public class HUD : MambSingleton<HUD> {
 		floorMask = LayerMask.GetMask ("Floor");
 
 		Cursor.SetCursor (defaultCursor, Vector2.zero, CursorMode.Auto);
+
+		// Make sure log string is disabled 
+		RemoveLog ();
 	}
 		
 	// Update is called once per frame
@@ -86,11 +103,6 @@ public class HUD : MambSingleton<HUD> {
 			if (Input.GetKeyDown (KeyCode.U))
 				UKey.PlayKey ();
 		}
-
-		if (Input.GetKeyDown (KeyCode.G)) {
-
-			storyDisplay.Click ();
-		}
 	}
 
 	void MouseActions() {
@@ -106,7 +118,7 @@ public class HUD : MambSingleton<HUD> {
 
 		if (Input.GetMouseButton (0)) {
 
-			if (UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject (-1))
+			if (EventSystem.current.IsPointerOverGameObject ())
 				return;
 
 			Ray camRay = Camera.main.ScreenPointToRay (Input.mousePosition);
@@ -127,5 +139,52 @@ public class HUD : MambSingleton<HUD> {
 				CursorDelta = distance.normalized;
 			}
 		}
+	}
+
+	public void SetFood(float food) {
+
+		foodBar.value = food;
+
+		uint maxFood = MambConstants.PLAYER_MAX_FOOD;
+		float barLowLimit = (float)MambConstants.PLAYER_LOW_FOOD / (float)maxFood;
+
+		if (foodBar.value <= barLowLimit)
+			foodBarAnimation.SetTrigger ("BarBlink");
+	}
+
+	public void SetEnergy(float energy) {
+
+		energyBar.value = energy;
+
+		uint maxEnergy = MambConstants.PLAYER_MAX_ENERGY;
+		float barLowLimit = (float)MambConstants.PLAYER_LOW_ENERGY / (float)maxEnergy;
+
+		if (energyBar.value <= barLowLimit)
+			energyBarAnimation.SetTrigger ("BarBlink");
+	}
+
+	public void ReloadScene() {
+
+		sceneFader.StartFadeOut ("StoryMenu");
+	}
+
+	public void PlayMouseOverSFX() {
+
+		audioSource.Play ();
+	}
+
+	public void Log(string message) {
+
+		consoleMessage.text = message;
+		consoleMessage.enabled = true;
+
+		CancelInvoke ();
+		Invoke ("RemoveLog", 3f);
+	}
+
+	private void RemoveLog() {
+
+		consoleMessage.text = "";
+		consoleMessage.enabled = false;
 	}
 }

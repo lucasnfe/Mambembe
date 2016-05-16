@@ -15,10 +15,10 @@ public class MambNPC : MonoBehaviour {
 	readonly float DIST_TO_HOME   = 0.05f;
 	readonly float DIST_TO_LISTEN = 5.00f;
 
-	public float  m_timeToTip = 1f;
+	public float m_timeToTip = 1f;
 
-	public int    m_minTipValue = 1;
-	public int    m_maxTipValue = 2;
+	public uint m_minTipValue = 1;
+	public uint m_maxTipValue = 2;
 
 	public NPCState playerState { get; set; }
 
@@ -75,6 +75,9 @@ public class MambNPC : MonoBehaviour {
 
 			MambPlayer player = GameWorld.Instance.Player;
 
+			if (player == null)
+				return;
+
 			if (Vector3.Distance (transform.position, player.transform.position) > DIST_TO_LISTEN)
 				return;
 
@@ -102,7 +105,7 @@ public class MambNPC : MonoBehaviour {
 
 	void TipPlayer() {
 
-		int tip = Random.Range (m_minTipValue, m_maxTipValue);
+		uint tip = (uint)Random.Range (m_minTipValue, m_maxTipValue);
 
 		GameWorld.Instance.Player.AddGold (tip);
 		audioSource.Play ();

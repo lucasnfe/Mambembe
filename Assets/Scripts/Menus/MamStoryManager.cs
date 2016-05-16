@@ -5,6 +5,7 @@ using System.Collections;
 public class MamStoryManager : MonoBehaviour {
 
 	private static int m_pageNumber = 0;
+	private static int m_pageBreak  = 2;
 
 	private MambFadeScene sceneFader;
 
@@ -30,20 +31,47 @@ public class MamStoryManager : MonoBehaviour {
 
 		if (Input.GetKeyDown (KeyCode.Space) || Input.GetMouseButtonDown (0)) {
 
-			FlipPage ();
+			if(!sceneFader.sceneEnding && !sceneFader.sceneStarting)
+				FlipPage ();
 		}
 	}
 
 	void FlipPage() {
 
-		if (m_pageNumber + 1 < m_pages.Length) {
+		if (m_pageNumber + 1 < m_pageBreak) {
 
 			m_pageNumber++;
 			sceneFader.StartFadeOut ("StoryMenu");
 		} 
 		else {
 
-			sceneFader.StartFadeOut ("DemoScene");
+			if (m_pageBreak == 2) {
+
+				m_pageNumber++;
+				m_pageBreak += 2;
+
+				sceneFader.StartFadeOut ("Village");
+			} 
+			else if (m_pageBreak == 4) {
+
+				m_pageNumber++;
+				m_pageBreak += 1;
+
+				sceneFader.StartFadeOut ("Village1");
+			}
+			else if (m_pageBreak == 5) {
+
+				m_pageNumber++;
+				m_pageBreak += 2;
+
+				sceneFader.StartFadeOut ("Village1");
+			}
+			else if (m_pageBreak == 7) {
+
+				m_pageNumber = 0;
+				m_pageBreak = 2;
+				sceneFader.StartFadeOut ("MainMenu");
+			}
 		}
 	}
 }

@@ -18,6 +18,10 @@ public class ActivateItemButton : MonoBehaviour {
 	
 		if (!isItemActive) {
 
+			string message = "";
+			if (!item.CheckAvailability (ref message))
+				return;
+
 			isItemActive = true;
 
 			item.gameObject.SetActive (true);

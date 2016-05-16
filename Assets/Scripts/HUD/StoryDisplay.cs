@@ -1,24 +1,21 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 public class StoryDisplay : MonoBehaviour {
 
 	private bool m_isOpen;
+	public bool IsOpen {
+		get { return m_isOpen; }
+	}
 
 	private Animation m_animation;
 
-	public AnimationClip m_openAnimation;
-	public AnimationClip m_closeAnimation;
+	public Text m_text;
 
 	void Awake() {
 
 		m_animation = GetComponent<Animation> ();
-	}
-
-	void Start() {
-
-		m_animation.AddClip (m_openAnimation, "open");
-		m_animation.AddClip (m_closeAnimation, "close");
 	}
 
 	public void Click() {
@@ -35,7 +32,7 @@ public class StoryDisplay : MonoBehaviour {
 		if (!m_isOpen) {
 
 			Debug.Log ("asda");
-			m_animation.Play ("open");
+			m_animation.Play ("StoryPanel");
 
 			m_isOpen = true;
 		}
@@ -45,9 +42,14 @@ public class StoryDisplay : MonoBehaviour {
 
 		if (m_isOpen) {
 
-			m_animation.Play ("close");
+			m_animation.Play ("StoryPanelClose");
 
 			m_isOpen = false;
 		}
+	}
+
+	public void SetText(string text) {
+
+		m_text.text = text;
 	}
 }

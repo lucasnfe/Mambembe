@@ -10,8 +10,8 @@ public class MambFadeScene: MonoBehaviour
 	public Image FadeImg;
 	public float fadeSpeed = 1.5f;
 
-	public bool    sceneStarting = false;
-	public bool    sceneEnding   = false;
+	public bool sceneStarting = false;
+	public bool sceneEnding   = false;
 
 	void Awake()
 	{
