@@ -32,11 +32,11 @@ delegate void ActivateItem();
 
 public class MambConstants {
 
-	public static readonly uint PLAYER_LOW_ENERGY = 15;
-	public static readonly uint PLAYER_LOW_FOOD = 15;
+	public static readonly uint PLAYER_LOW_ENERGY = 150;
+	public static readonly uint PLAYER_LOW_FOOD = 150;
 
 	public static readonly uint PLAYER_MAX_GOLD   = 100;
-	public static readonly uint PLAYER_MAX_FOOD   = 100;
-	public static readonly uint PLAYER_MAX_ENERGY = 100;
+	public static readonly uint PLAYER_MAX_FOOD   = 1000;
+	public static readonly uint PLAYER_MAX_ENERGY = 1000;
 
 }

@@ -62,11 +62,11 @@ public class MamStoryManager : MonoBehaviour {
 			else if (m_pageBreak == 5) {
 
 				m_pageNumber++;
-				m_pageBreak += 2;
+				m_pageBreak += 3;
 
 				sceneFader.StartFadeOut ("Village1");
 			}
-			else if (m_pageBreak == 7) {
+			else if (m_pageBreak == 8) {
 
 				m_pageNumber = 0;
 				m_pageBreak = 2;

@@ -23,6 +23,12 @@ public class InstrumentKeyButton : MonoBehaviour {
 		if (GameWorld.Instance.Player.playerItem == null)
 			return;
 
+		if (GameWorld.Instance.Player.energy <= MambConstants.PLAYER_LOW_ENERGY) {
+
+			GameWorld.Instance.Player.playerItem.DeactivateItem ();
+			return;
+		}
+
 		if (GameWorld.Instance.Player.playerItem.GetType() == typeof(MambMusicalInstrument)) {
 
 			MambMusicalInstrument instument = (MambMusicalInstrument)GameWorld.Instance.Player.playerItem;
@@ -35,20 +41,22 @@ public class InstrumentKeyButton : MonoBehaviour {
 				RectTransform noteRect = note.GetComponent<RectTransform> ();
 				RectTransform keyRect = this.GetComponent<RectTransform> ();
 
-				if (RectTransformUtility.RectangleContainsScreenPoint(keyRect, noteRect.anchoredPosition)) {
+				if (RectTransformUtility.RectangleContainsScreenPoint (keyRect, noteRect.anchoredPosition)) {
 
 					m_audioSource.clip = m_originalClip;
 					m_audioSource.Play ();
 
 					instument.DeleteNote (note);
+				} 
+				else { 
+					
+					m_audioSource.clip = m_wrongNote;
+					m_audioSource.Play ();
 
-					return;
+					instument.PlayedWrongNote (note);
 				}
 
-				m_audioSource.clip = m_wrongNote;
-				m_audioSource.Play ();
-
-				instument.PlayedWrongNote (note);
+				GameWorld.Instance.Player.ConsumeEnergy (1);
 			}
 		}
 	}

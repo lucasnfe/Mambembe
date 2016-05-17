@@ -7,11 +7,14 @@ public class MambNPC : MonoBehaviour {
 
 	private AudioSource audioSource;
 	private NavMeshAgent agent;
+	private Animator  playerAnimator;
+
+	private Vector3 m_startDirection;
 
 	private float m_timerToConsiderTip = 0f;
 	private float m_timerToTip = 0f;
 
-	readonly float DIST_TO_TIP    = 1.00f;
+	readonly float DIST_TO_TIP    = 1.15f;
 	readonly float DIST_TO_HOME   = 0.05f;
 	readonly float DIST_TO_LISTEN = 5.00f;
 
@@ -26,6 +29,7 @@ public class MambNPC : MonoBehaviour {
 
 		agent = GetComponent<NavMeshAgent> ();
 		audioSource = GetComponent<AudioSource> ();
+		playerAnimator = GetComponent <Animator> ();
 
 		GetComponent<Renderer> ().material.color = Random.ColorHSV ();
 	}
@@ -35,6 +39,7 @@ public class MambNPC : MonoBehaviour {
 
 		playerState = NPCState.Idle;
 		originalPos = transform.position;
+		m_startDirection = transform.position + transform.forward;
 	}
 	
 	// Update is called once per frame
@@ -44,7 +49,9 @@ public class MambNPC : MonoBehaviour {
 
 			Debug.Log ("Goind home.");
 
-			if (MoveToPoint() == true)
+			transform.LookAt (m_startDirection);
+
+			if (MoveToPoint () == true)
 				playerState = NPCState.Idle;
 		}
 
@@ -56,7 +63,11 @@ public class MambNPC : MonoBehaviour {
 				playerState = NPCState.Tiping;
 		}
 
+		Animating ();
+
 		if (playerState == NPCState.Tiping) {
+
+			agent.speed = 0f;
 
 			m_timerToTip += Time.deltaTime;
 			if (m_timerToTip >= 1f) {
@@ -97,7 +108,7 @@ public class MambNPC : MonoBehaviour {
 					}
 						
 					m_timerToConsiderTip = 0f;
-					Debug.Log ("Considered tipping.");
+//					Debug.Log ("Considered tipping.");
 				}
 			}
 		}
@@ -122,5 +133,14 @@ public class MambNPC : MonoBehaviour {
 		}
 
 		return false;
+	}
+
+	void Animating ()
+	{
+		// Create a boolean that is true if either of the input axes is non-zero.
+		bool walking = (agent.velocity != Vector3.zero);
+
+		// Tell the animator whether or not the player is walking.
+		playerAnimator.SetBool ("IsWalking", walking);
 	}
 }
