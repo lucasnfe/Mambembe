@@ -58,6 +58,12 @@ public class MambInteractBallon : MonoBehaviour
 		if (GameWorld.Instance.Player.playerState == PlayerState.Playing)
 			return;
 
+		if (GameWorld.Instance.Camera.IsFocusing ()) {
+
+			DeselectObject ();
+			return;
+		}
+
 		Ray camRay = Camera.main.ScreenPointToRay (Input.mousePosition);
 
 		bool wasHit = false;

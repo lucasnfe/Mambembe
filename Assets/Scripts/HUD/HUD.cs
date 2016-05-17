@@ -113,6 +113,10 @@ public class HUD : MambSingleton<HUD> {
 			return;
 		}
 
+		if (GameWorld.Instance.Player.playerState == PlayerState.Playing) {
+			return;
+		}
+
 		if (Input.GetMouseButtonUp (0))
 			CursorDelta = Vector3.zero;
 

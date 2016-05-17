@@ -31,9 +31,7 @@ public class StoryDisplay : MonoBehaviour {
 
 		if (!m_isOpen) {
 
-			Debug.Log ("asda");
 			m_animation.Play ("StoryPanel");
-
 			m_isOpen = true;
 		}
 	}
@@ -43,7 +41,6 @@ public class StoryDisplay : MonoBehaviour {
 		if (m_isOpen) {
 
 			m_animation.Play ("StoryPanelClose");
-
 			m_isOpen = false;
 		}
 	}

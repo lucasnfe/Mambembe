@@ -12,6 +12,6 @@ public class MambStoryEvent : MambEventMarker {
 
 	public override void TriggerExitEvent() {
 
-		GameWorld.Instance.Player.ConsumeEnergy (5);
+		GameWorld.Instance.Player.ConsumeEnergy (50);
 	}
 }

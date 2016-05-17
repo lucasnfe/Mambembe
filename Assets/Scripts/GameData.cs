@@ -4,7 +4,7 @@ using System.Collections;
 public class GameData : MonoBehaviour {
 
 	public static uint PlayerEnergy = MambConstants.PLAYER_LOW_ENERGY;
-	public static uint PlayerFood   = MambConstants.PLAYER_LOW_ENERGY * 3;
+	public static uint PlayerFood   = MambConstants.PLAYER_LOW_FOOD * 3;
 	public static uint PlayerGold   = 0;
 
 	public static bool PayedInn = false;

@@ -5,7 +5,7 @@ public class MambPlayerEvent : MambStoryEvent {
 
 	public override void TriggerExitEvent() {
 
-		GameWorld.Instance.Player.ConsumeEnergy (5);
+		GameWorld.Instance.Player.ConsumeEnergy (50);
 		Invoke ("ReloadScene", 1f);
 	}
 

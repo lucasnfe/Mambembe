@@ -77,12 +77,6 @@ public class MambPlayer : MonoBehaviour
 
 	void Move ()
 	{
-		if (playerState == PlayerState.Playing) {
-
-			playerMove = Vector3.zero;
-			return;
-		}
-
 		if (HUD.Instance.CursorDelta != Vector3.zero)
 			playerMove = HUD.Instance.CursorDelta;
 

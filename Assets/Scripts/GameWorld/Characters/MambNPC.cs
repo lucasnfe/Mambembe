@@ -47,7 +47,7 @@ public class MambNPC : MonoBehaviour {
 
 		if (playerState == NPCState.GoingHome) {
 
-			Debug.Log ("Goind home.");
+//			Debug.Log ("Goind home.");
 
 			transform.LookAt (m_startDirection);
 
@@ -57,7 +57,7 @@ public class MambNPC : MonoBehaviour {
 
 		if (playerState == NPCState.ApprochingPlayer) {
 
-			Debug.Log ("Approaching player.");
+//			Debug.Log ("Approaching player.");
 
 			if (MoveToPoint() == true)
 				playerState = NPCState.Tiping;

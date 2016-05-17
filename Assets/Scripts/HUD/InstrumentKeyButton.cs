@@ -37,7 +37,7 @@ public class InstrumentKeyButton : MonoBehaviour {
 
 				if (note == null)
 					break;
-
+					
 				RectTransform noteRect = note.GetComponent<RectTransform> ();
 				RectTransform keyRect = this.GetComponent<RectTransform> ();
 
@@ -47,6 +47,7 @@ public class InstrumentKeyButton : MonoBehaviour {
 					m_audioSource.Play ();
 
 					instument.DeleteNote (note);
+					break;
 				} 
 				else { 
 					
