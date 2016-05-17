@@ -12,7 +12,7 @@ public class MambPlayerEvent : MambStoryEvent {
 	private void ReloadScene() {
 
 		GameData.PlayerFood = 100;
-		GameData.PlayerEnergy = 100;
+		GameData.PlayerEnergy = MambConstants.PLAYER_MAX_ENERGY;
 			
 		HUD.Instance.ReloadScene ();
 	}
