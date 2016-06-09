@@ -8,7 +8,7 @@ public class MambInnBallon : MambInteractBallon {
 		//Render the text
 		if(!GameData.PayedInn) {
 			
-			if (GUI.Button (new Rect (startX, startY + 20, 60, 30), "Pay   10", guiSkin.button)) {
+			if (GUI.Button (new Rect (startX, startY + 20, 60, 15), "Pay 10", guiSkin.button)) {
 
 				Debug.Log ("Pay!");
 

@@ -6,7 +6,7 @@ public class MambTavernBallon : MambInteractBallon {
 	public override void DrawInteractionOptions(float startX, float startY) {
 
 		//Render the text
-		if (GUI.Button (new Rect (startX, startY + 20, 60, 30), "Drink 5", guiSkin.button)) {
+		if (GUI.Button (new Rect (startX, startY + 20, 60, 15), "Drink 5", guiSkin.button)) {
 
 			Debug.Log ("Drink!");
 

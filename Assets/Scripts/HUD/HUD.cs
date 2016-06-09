@@ -5,7 +5,6 @@ using System.Collections;
 
 public class HUD : MambSingleton<HUD> {
 
-	private int   floorMask;
 	private float camRayLength;
 
 	private Color cursorColor;
@@ -54,9 +53,6 @@ public class HUD : MambSingleton<HUD> {
 
 		// Camera ray size
 		camRayLength = 100f;
-
-		// Create a layer ask for the floor layer.
-		floorMask = LayerMask.GetMask ("Floor");
 
 		Cursor.SetCursor (defaultCursor, Vector2.zero, CursorMode.Auto);
 
@@ -116,13 +112,16 @@ public class HUD : MambSingleton<HUD> {
 		if (GameWorld.Instance.Player.playerState == PlayerState.Playing) {
 			return;
 		}
-
+			
 		if (Input.GetMouseButtonUp (0))
 			CursorDelta = Vector3.zero;
-
+		
 		if (Input.GetMouseButton (0)) {
 
 			if (EventSystem.current.IsPointerOverGameObject ())
+				return;
+
+			if(MambInnBallon.IsMouseOverBallon(Input.mousePosition))
 				return;
 
 			Ray camRay = Camera.main.ScreenPointToRay (Input.mousePosition);
@@ -130,17 +129,31 @@ public class HUD : MambSingleton<HUD> {
 			RaycastHit floorHit;
 
 			// Perform the raycast and if it hits something on the floor layer...
-			if (Physics.Raycast (camRay, out floorHit, camRayLength, floorMask)) {
+			RaycastHit[] hits = Physics.RaycastAll (camRay);
 
-				Vector3 distance = floorHit.point - GameWorld.Instance.Player.transform.position;
-				distance.y = 0f;
+			foreach (RaycastHit h in hits) {
 
-				if (distance.magnitude < 0.35f || floorHit.point.y > 0f)
+				if (h.collider.gameObject.layer == LayerMask.NameToLayer ("Interactble")) {
+
+					CursorDelta = Vector3.zero;
 					return;
+				}
+			}
+		
+			foreach (RaycastHit h in hits) {
+				
+				if (h.collider.gameObject.layer == LayerMask.NameToLayer("Floor")) {
 
-				// Normalise the movement vector and make it proportional to the speed per second.
-				NextCursorPos = floorHit.point;
-				CursorDelta = distance.normalized;
+					Vector3 distance = h.point - GameWorld.Instance.Player.transform.position;
+					distance.y = 0f;
+
+					if (distance.magnitude < 0.35f || h.point.y > 0f)
+						return;
+
+					// Normalise the movement vector and make it proportional to the speed per second.
+					NextCursorPos = h.point;
+					CursorDelta = distance.normalized;
+				}
 			}
 		}
 	}
