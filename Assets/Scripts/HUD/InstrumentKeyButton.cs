@@ -54,7 +54,7 @@ public class InstrumentKeyButton : MonoBehaviour {
 					m_audioSource.clip = m_wrongNote;
 					m_audioSource.Play ();
 
-					instument.PlayedWrongNote (note);
+					instument.PlayedWrongNote ();
 				}
 
 				GameWorld.Instance.Player.ConsumeEnergy (1);

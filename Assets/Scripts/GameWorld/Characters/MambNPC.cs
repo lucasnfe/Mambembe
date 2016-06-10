@@ -3,6 +3,8 @@ using System.Collections;
 
 public class MambNPC : MonoBehaviour {
 
+	private static int hangingAmount = 0;
+
 	private Vector3 originalPos;
 
 	private AudioSource audioSource;
@@ -11,10 +13,13 @@ public class MambNPC : MonoBehaviour {
 
 	private Vector3 m_startDirection;
 
+	private bool  m_tipped = false;
+	private int   m_timesTriedTip = 0;
 	private float m_timerToConsiderTip = 0f;
 	private float m_timerToTip = 0f;
+	private float m_timerToConsiderHang = 0f;
 
-	readonly float DIST_TO_TIP    = 1.15f;
+	readonly float DIST_TO_TIP    = 1.5f;
 	readonly float DIST_TO_HOME   = 0.05f;
 	readonly float DIST_TO_LISTEN = 5.00f;
 
@@ -40,14 +45,15 @@ public class MambNPC : MonoBehaviour {
 		playerState = NPCState.Idle;
 		originalPos = transform.position;
 		m_startDirection = transform.position + transform.forward;
+
 	}
 	
 	// Update is called once per frame
 	void Update () {
 
-		if (playerState == NPCState.GoingHome) {
+		Animating ();
 
-//			Debug.Log ("Goind home.");
+		if (playerState == NPCState.GoingHome) {
 
 			transform.LookAt (m_startDirection);
 
@@ -57,17 +63,53 @@ public class MambNPC : MonoBehaviour {
 
 		if (playerState == NPCState.ApprochingPlayer) {
 
-//			Debug.Log ("Approaching player.");
-
-			if (MoveToPoint() == true)
-				playerState = NPCState.Tiping;
+			if (MoveToPoint () == true) {
+				playerState = NPCState.Hanging;
+				hangingAmount++;
+			}
 		}
 
-		Animating ();
+		if (playerState == NPCState.Hanging) {
+
+			//			Debug.Log ("Approaching player.");
+			agent.speed = 0f;
+			agent.velocity = Vector3.zero;
+
+			MambPlayer player = GameWorld.Instance.Player;
+			MambMusicalInstrument instument = (MambMusicalInstrument)player.playerItem;
+
+			if (instument != null) {
+
+				m_timerToConsiderTip += Time.deltaTime;
+				if (m_timerToConsiderTip >= 5f) {
+
+					m_timerToConsiderTip = 0f;
+
+					if (Random.value * (float)hangingAmount >= (1f / (1f + instument.Score)) * 5f) {
+
+						playerState = NPCState.Tiping;
+						hangingAmount--;
+						m_timesTriedTip = 0;
+					} 
+					else {
+
+						m_timesTriedTip++;
+					}
+
+					if (m_timesTriedTip >= 3) {
+
+						agent.speed = 1f;
+						playerState = NPCState.GoingHome;
+						m_timesTriedTip = 0;
+					}
+				}
+			}
+		}
 
 		if (playerState == NPCState.Tiping) {
 
 			agent.speed = 0f;
+			agent.velocity = Vector3.zero;
 
 			m_timerToTip += Time.deltaTime;
 			if (m_timerToTip >= 1f) {
@@ -84,22 +126,29 @@ public class MambNPC : MonoBehaviour {
 
 		if (playerState == NPCState.Idle) {
 
-			MambPlayer player = GameWorld.Instance.Player;
+			agent.speed = 0f;
+			agent.velocity = Vector3.zero;
 
+			if (m_tipped)
+				return;
+
+			MambPlayer player = GameWorld.Instance.Player;
 			if (player == null)
 				return;
 
-			if (Vector3.Distance (transform.position, player.transform.position) > DIST_TO_LISTEN)
-				return;
+//			if (Vector3.Distance (transform.position, player.transform.position) > DIST_TO_LISTEN)
+//				return;
 
 			if (player.playerState == PlayerState.Playing) {
 
-				m_timerToConsiderTip += Time.deltaTime;
-				if (m_timerToConsiderTip >= m_timeToTip) {
+				MambMusicalInstrument instument = (MambMusicalInstrument)player.playerItem;
+				if (instument.Score < 0.3f)
+					return;
 
-					MambMusicalInstrument instument = (MambMusicalInstrument)player.playerItem;
+				m_timerToConsiderHang += Time.deltaTime;
+				if (m_timerToConsiderHang >= m_timeToTip) {
 
-					if (Random.value <= instument.m_score.value) {
+					if (Random.value*2f <= instument.Score) {
 
 						agent.destination = GameWorld.Instance.Player.transform.position;
 						agent.stoppingDistance = DIST_TO_TIP;
@@ -107,7 +156,7 @@ public class MambNPC : MonoBehaviour {
 						playerState = NPCState.ApprochingPlayer;
 					}
 						
-					m_timerToConsiderTip = 0f;
+					m_timerToConsiderHang = 0f;
 //					Debug.Log ("Considered tipping.");
 				}
 			}
@@ -120,6 +169,8 @@ public class MambNPC : MonoBehaviour {
 
 		GameWorld.Instance.Player.AddGold (tip);
 		audioSource.Play ();
+
+		m_tipped = true;
 	}
 
 	bool MoveToPoint() {
@@ -129,6 +180,7 @@ public class MambNPC : MonoBehaviour {
 		if (Vector3.Distance (transform.position, agent.destination) <= agent.stoppingDistance) {
 
 			agent.speed = 0f;
+			agent.velocity = Vector3.zero;
 			return true;
 		}
 
@@ -138,7 +190,7 @@ public class MambNPC : MonoBehaviour {
 	void Animating ()
 	{
 		// Create a boolean that is true if either of the input axes is non-zero.
-		bool walking = (agent.velocity != Vector3.zero);
+		bool walking = (agent.velocity.magnitude >= 0.01f);
 
 		// Tell the animator whether or not the player is walking.
 		playerAnimator.SetBool ("IsWalking", walking);

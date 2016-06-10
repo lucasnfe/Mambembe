@@ -11,6 +11,7 @@ public enum NPCState
 {
 	Idle,
 	ApprochingPlayer,
+	Hanging,
 	GoingHome,
 	Tiping
 }

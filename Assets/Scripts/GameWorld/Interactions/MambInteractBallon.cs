@@ -96,7 +96,7 @@ public class MambInteractBallon : MonoBehaviour
 		if (Input.GetMouseButton (0) && isInteractionWindowOpen && !wasHit && !IsMouseOverBallon (Input.mousePosition))
 			isInteractionWindowOpen = false;
 
-		if(Input.GetMouseButton (0) && HUD.Instance.storyDisplay.IsOpen)
+		if(Input.GetMouseButton (0) && HUD.Instance.storyDisplay.IsOpen && !HUD.Instance.storyDisplay.WasStoryEvent())
 			HUD.Instance.storyDisplay.Click ();
 
 		if(isMouseOver && !wasHit)
@@ -118,6 +118,9 @@ public class MambInteractBallon : MonoBehaviour
 	//Draw GUIs
 	void OnGUI()
 	{
+		if (HUD.Instance.IsFading ())
+			return;
+
 		if (isInteractionWindowOpen) {
 
 			// Begin the GUI group centering the speech bubble at the same position of this game object. 

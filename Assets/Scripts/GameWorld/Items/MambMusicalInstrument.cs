@@ -2,17 +2,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using SynchronizerData;
 
 [RequireComponent (typeof (AudioSource))]
 public class MambMusicalInstrument : MambItem {
 
-	public float m_scorePerNote = 0.1f;
+	public float m_scorePerNote = 0.01f;
 
-	public Slider m_score;
 	public GameObject m_sheetPanel;
 	public GameObject m_noteIcon;
 
 	private MambObjectPool m_notes;
+
+	public float Score { get; set; }
 
 	private List<GameObject>  m_playedNotes;
 	private GameObject[]      m_notesToDelete;
@@ -21,14 +23,23 @@ public class MambMusicalInstrument : MambItem {
 	private int   m_del;
 	private float m_noteStart;
 	private float m_sheetPos;
-	private float m_noteTimer;
+	private float m_lastNode;
 
-	private float []m_barPos = {40f, 60f, 80f, 100f};
+	private BeatCounter      _beatCounter;
+	private BeatObserver     _beatObserver;
+	private BeatSynchronizer _beatSync;
+
+	private readonly float []m_barPos = {20f, 40f, 60f, 80f};
+
+	void Awake() {
+
+		_beatSync = GetComponent<BeatSynchronizer>();
+		_beatCounter = GetComponent<BeatCounter>();
+		_beatObserver = GetComponent<BeatObserver>();
+	}
 
 	// Use this for initialization
 	void Start () {
-
-		m_noteTimer = 1.38f;
 
 		m_sheetPos  = Screen.width / 2f - m_sheetPanel.GetComponent<RectTransform> ().rect.width / 3f;
 		m_noteStart = Screen.width / 2f + m_sheetPanel.GetComponent<RectTransform> ().rect.width / 3f;
@@ -38,20 +49,47 @@ public class MambMusicalInstrument : MambItem {
 		m_playedNotes   = new List<GameObject>();
 		m_notesToDelete = new GameObject[m_barPos.Length];
 		m_nextFourNotes = new GameObject[m_barPos.Length];
-	}
 
-	void FixedUpdate() {
+		for (int i = 0; i < m_barPos.Length; i++)
+			m_barPos [i] += ((Screen.height / 2f) - m_sheetPanel.GetComponent<RectTransform> ().rect.height);
+	}
+		
+	void Update() {
 
 		if (GameWorld.Instance.Player.playerState != PlayerState.Playing)
 			return;
 
+		if ((_beatObserver.beatMask & BeatType.OnBeat) == BeatType.OnBeat) {
+
+			ScoreToBeatValue ();
+
+			GameObject no = m_notes.GetFreeObject ();
+
+			float randomBarPos = m_barPos [Random.Range (0, ScoreToBars())];
+			if (randomBarPos == m_lastNode) {
+
+				for (int i = 0; i < ScoreToBars(); i++) {
+
+					if(m_barPos[i] != m_lastNode) {
+						randomBarPos = m_barPos [i];
+						break;
+					}
+				}
+			}
+
+			no.transform.position = new Vector3 (m_noteStart, randomBarPos, 0f);
+			m_playedNotes.Add (no);
+
+			m_lastNode = randomBarPos;
+		}
+
 		foreach (GameObject note in m_playedNotes) {
 
-			note.transform.Translate (Vector3.left * 60f * Time.fixedDeltaTime);
+			note.transform.Translate (Vector3.left * 88f * Time.deltaTime);
 
 			if (note.transform.position.x <= m_sheetPos + 50f) {
 
-				m_score.value = 0f;
+				PlayedWrongNote ();
 
 				m_notesToDelete[m_del] = note;
 				m_del++;
@@ -67,19 +105,8 @@ public class MambMusicalInstrument : MambItem {
 			m_notesToDelete [i] = null;
 			deletedNotes++;
 		}
-			
+
 		m_del -= deletedNotes;
-		m_noteTimer += Time.fixedDeltaTime;
-
-		if (m_noteTimer >= 1.38f) {
-
-			GameObject note = m_notes.GetFreeObject ();
-			float randomBarPos = m_barPos [Random.Range (0, m_barPos.Length)];
-			note.transform.position = new Vector3 (m_noteStart, randomBarPos, 0f);
-			m_playedNotes.Add (note);
-
-			m_noteTimer = 0f;
-		}
 	}
 
 	override public bool CheckAvailability(ref string message) {
@@ -108,6 +135,7 @@ public class MambMusicalInstrument : MambItem {
 
 	public void ActivateMusicSheet() {
 
+		Score = 0f;
 		m_sheetPanel.SetActive (true);
 
 		GameWorld.Instance.Player.playerItem = this;
@@ -138,14 +166,48 @@ public class MambMusicalInstrument : MambItem {
 
 	public void DeleteNote(GameObject note) {
 
-		m_score.value += m_scorePerNote;
+		Score += m_scorePerNote;
+
+		if (Score >= 1f)
+			Score = 1f;
 
 		m_notesToDelete[m_del] = note;
 		m_del++;
 	}
 
-	public void PlayedWrongNote(GameObject note) {
+	public void PlayedWrongNote() {
 
-		m_score.value = 0;
+		Score -= m_scorePerNote;
+
+		if (Score <= 0f)
+			Score = 0f;
+	}
+
+	public int ScoreToBars() {
+
+		if (Score >= 0f && Score < 0.4f)
+			return 3;
+
+		else if (Score >= 0.4f && Score < 0.6f)
+			return 3;
+
+		else if (Score >= 0.6f && Score < 0.7f)
+			return 3;
+
+		return 4;
+	}
+
+	public void ScoreToBeatValue() {
+
+		if (Score >= 0f && Score < 0.8f)
+			_beatCounter.beatValue = BeatValue.WholeBeat;
+
+		else if (Score >= 0.8f && Score <= 1f)
+			_beatCounter.beatValue = BeatValue.HalfBeat;
+
+		Debug.Log ("Score = " + Score);
+
+		_beatCounter.CalculateSamples ();
+		
 	}
 }

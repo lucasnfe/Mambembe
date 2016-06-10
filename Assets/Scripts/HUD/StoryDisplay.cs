@@ -11,6 +11,11 @@ public class StoryDisplay : MonoBehaviour {
 
 	private Animation m_animation;
 
+	private bool wasStoryEvent;
+	public bool WasStoryEvent() {
+		return wasStoryEvent;
+	}
+
 	public Text m_text;
 
 	void Awake() {
@@ -45,8 +50,9 @@ public class StoryDisplay : MonoBehaviour {
 		}
 	}
 
-	public void SetText(string text) {
+	public void SetText(string text, bool storyEvent = false) {
 
+		wasStoryEvent = storyEvent;
 		m_text.text = text;
 	}
 }

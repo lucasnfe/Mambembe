@@ -5,6 +5,11 @@ using System.Collections;
 
 public class HUD : MambSingleton<HUD> {
 
+	private bool isFading;
+	public bool IsFading () {
+		return isFading;
+	}
+
 	private float camRayLength;
 
 	private Color cursorColor;
@@ -58,6 +63,8 @@ public class HUD : MambSingleton<HUD> {
 
 		// Make sure log string is disabled 
 		RemoveLog ();
+
+		isFading = false;
 	}
 		
 	// Update is called once per frame
@@ -87,16 +94,16 @@ public class HUD : MambSingleton<HUD> {
 
 		if (GameWorld.Instance.Player.playerState == PlayerState.Playing) {
 
-			if (Input.GetKeyDown (KeyCode.R))
+			if (Input.GetKeyDown (KeyCode.U))
 				RKey.PlayKey ();
 
-			if (Input.GetKeyDown (KeyCode.T))
+			if (Input.GetKeyDown (KeyCode.H))
 				TKey.PlayKey ();
 
-			if (Input.GetKeyDown (KeyCode.Y))
+			if (Input.GetKeyDown (KeyCode.D))
 				YKey.PlayKey ();
 
-			if (Input.GetKeyDown (KeyCode.U))
+			if (Input.GetKeyDown (KeyCode.C))
 				UKey.PlayKey ();
 		}
 	}
@@ -182,6 +189,7 @@ public class HUD : MambSingleton<HUD> {
 
 	public void ReloadScene() {
 
+		isFading = true;
 		sceneFader.StartFadeOut ("StoryMenu");
 	}
 

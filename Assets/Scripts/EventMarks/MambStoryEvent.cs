@@ -7,7 +7,7 @@ public class MambStoryEvent : MambEventMarker {
 
 	public override void TriggerEnterEvent() {
 
-		HUD.Instance.storyDisplay.SetText (m_text.text);
+		HUD.Instance.storyDisplay.SetText (m_text.text, true);
 	}
 
 	public override void TriggerExitEvent() {
